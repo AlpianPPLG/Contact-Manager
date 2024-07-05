@@ -1,38 +1,30 @@
-.App {
-  text-align: center;
+/* Gaya umum */
+body.dark {
+  background-color: #1a202c; /* Background dark mode */
+  color: #cbd5e0; /* Text color dark mode */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App.dark {
+  background-color: #1a202c; /* Background untuk dark mode */
+  color: #cbd5e0; /* Text color untuk dark mode */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Gaya khusus untuk elemen-elemen lain yang memerlukan penyesuaian */
+.dark .contact-card {
+  background-color: #2d3748; /* Background kartu kontak dark mode */
+  color: #cbd5e0; /* Text color kartu kontak dark mode */
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.dark .form-input {
+  background-color: #2d3748; /* Background form input dark mode */
+  color: #cbd5e0; /* Text color form input dark mode */
 }
 
-.App-link {
-  color: #61dafb;
+.dark .form-input input[type="text"],
+.dark .form-input input[type="email"] {
+  background-color: #4a5568; /* Background input dark mode */
+  color: #cbd5e0; /* Text color input dark mode */
+  border-color: #2d3748; /* Border color input dark mode */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* Tambahkan penyesuaian gaya lainnya sesuai kebutuhan aplikasi Anda */
