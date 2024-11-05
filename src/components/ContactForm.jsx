@@ -15,13 +15,23 @@ const ContactForm = ({ addContact, editContact }) => {
     }
   }, [editContact]);
 
+  // Fungsi untuk menangani pengeditan kontak
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
 
+    // Validasi input
     if (!name) newErrors.name = "Name is required";
-    if (!email) newErrors.email = "Email is required";
-    if (!phone) newErrors.phone = "Phone is required";
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Email address is invalid";
+    }
+    if (!phone) {
+      newErrors.phone = "Phone is required";
+    } else if (!/^\d+$/.test(phone)) {
+      newErrors.phone = "Phone number should only contain digits";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
