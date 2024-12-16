@@ -1,7 +1,14 @@
 import React from "react";
 import ContactCard from "./ContactCard";
 
-const ContactList = ({ contacts, onEdit, onDelete }) => {
+const ContactList = ({
+  contacts,
+  onEdit,
+  onDelete,
+  selectedIds,
+  onSelect,
+  addReview,
+}) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-4 shadow-md rounded">
       {contacts.length === 0 ? (
@@ -15,6 +22,9 @@ const ContactList = ({ contacts, onEdit, onDelete }) => {
             contact={contact}
             onEdit={() => onEdit(contact)}
             onDelete={() => onDelete(contact.id)}
+            isSelected={selectedIds.includes(contact.id)}
+            onSelect={onSelect}
+            addReview={addReview}
           />
         ))
       )}

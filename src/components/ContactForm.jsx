@@ -4,6 +4,7 @@ const ContactForm = ({ addContact, editContact }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [category, setCategory] = useState(""); // Tambahkan state untuk kategori
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -11,16 +12,15 @@ const ContactForm = ({ addContact, editContact }) => {
       setName(editContact.name);
       setEmail(editContact.email);
       setPhone(editContact.phone);
+      setCategory(editContact.category || ""); // Set kategori jika ada
       setErrors({});
     }
   }, [editContact]);
 
-  // Fungsi untuk menangani pengeditan kontak
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validasi input
     if (!name) newErrors.name = "Name is required";
     if (!email) {
       newErrors.email = "Email is required";
@@ -42,11 +42,13 @@ const ContactForm = ({ addContact, editContact }) => {
       name,
       email,
       phone,
+      category,
       id: editContact ? editContact.id : Date.now(),
     });
     setName("");
     setEmail("");
     setPhone("");
+    setCategory(""); // Reset kategori
     setErrors({});
   };
 
@@ -111,6 +113,21 @@ const ContactForm = ({ addContact, editContact }) => {
         {errors.phone && (
           <p className="text-red-500 text-xs italic mt-2">{errors.phone}</p>
         )}
+      </div>
+      <div className="mb-4">
+        <label
+          className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
+          htmlFor="category"
+        >
+          Category
+        </label>
+        <input
+          id="category"
+          type="text"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+        />
       </div>
       <button
         type="submit"

@@ -1,76 +1,123 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ContactForm from "./components/ContactForm";
 import ContactList from "./components/ContactList";
-import "./App.css";
-import { FiPhone, FiMoon, FiSun } from "react-icons/fi"; // Import ikon telepon, mode gelap, dan terang
+import { FiPhone, FiMoon, FiSun } from "react-icons/fi";
 
 function App() {
   const [contacts, setContacts] = useState([]);
   const [editContact, setEditContact] = useState(null);
-  const [darkMode, setDarkMode] = useState(false); // State untuk mode gelap
-  const [searchTerm, setSearchTerm] = useState(""); // State untuk pencarian
-  const [errorMessage, setErrorMessage] = useState(""); // State untuk pesan kesalahan
+  const [darkMode, setDarkMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [contactsPerPage] = useState(5);
+  const [sortBy, setSortBy] = useState("name");
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  // Fungsi untuk menambah kontak baru atau mengedit kontak yang ada
+  useEffect(() => {
+    const savedContacts = JSON.parse(localStorage.getItem("contacts"));
+    if (savedContacts) {
+      setContacts(savedContacts);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
+
   const addContact = (contact) => {
-    // Cek apakah nama kontak sudah ada
     const isDuplicate = contacts.some(
       (c) => c.name.toLowerCase() === contact.name.toLowerCase()
     );
 
     if (isDuplicate) {
-      setErrorMessage("Contact name already exists."); // Set pesan kesalahan
+      setErrorMessage("Contact name already exists.");
       return;
     } else {
-      setErrorMessage(""); // Reset pesan kesalahan
+      setErrorMessage("");
     }
 
     if (editContact) {
       setContacts(contacts.map((c) => (c.id === editContact.id ? contact : c)));
       setEditContact(null);
     } else {
-      setContacts([...contacts, { ...contact, id: Date.now() }]);
+      setContacts([...contacts, { ...contact, id: Date.now(), reviews: [] }]);
     }
   };
 
-  // Fungsi untuk menangani pengeditan kontak
   const handleEdit = (contact) => {
     setEditContact(contact);
-    setErrorMessage(""); // Reset pesan kesalahan saat mengedit
+    setErrorMessage("");
   };
 
-  // Fungsi untuk menghapus kontak
   const handleDelete = (id) => {
     setContacts(contacts.filter((contact) => contact.id !== id));
   };
 
-  // Fungsi untuk mengubah status mode gelap
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+  const handleMultiDelete = () => {
+    setContacts(
+      contacts.filter((contact) => !selectedIds.includes(contact.id))
+    );
+    setSelectedIds([]);
   };
 
-  // Fungsi untuk menangani perubahan input pencarian
+  const addReview = (id, review) => {
+    setContacts(
+      contacts.map((contact) =>
+        contact.id === id
+          ? { ...contact, reviews: [...contact.reviews, review] }
+          : contact
+      )
+    );
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter kontak berdasarkan pencarian
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleSortChange = (e) => {
+    setSortBy(e.target.value);
+  };
+
+  const resetSearch = () => {
+    setSearchTerm("");
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((selectedId) => selectedId !== id)
+        : [...prevSelected, id]
+    );
+  };
+
+  const filteredContacts = contacts
+    .filter((contact) =>
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "email") return a.email.localeCompare(b.email);
+      return a.phone.localeCompare(b.phone);
+    });
+
+  const indexOfLastContact = currentPage * contactsPerPage;
+  const indexOfFirstContact = indexOfLastContact - contactsPerPage;
+  const currentContacts = filteredContacts.slice(
+    indexOfFirstContact,
+    indexOfLastContact
   );
+  const totalPages = Math.ceil(filteredContacts.length / contactsPerPage);
 
   return (
     <div className={`App container mx-auto p-4 ${darkMode ? "dark" : ""}`}>
       <div className="flex justify-between items-center mb-4">
-        <h1
-          className="text-3xl font-bold flex items-center cursor-pointer"
-          onClick={() => window.location.reload()}
-        >
+        <h1 className="text-3xl font-bold flex items-center cursor-pointer">
           <FiPhone className="mr-1" />
           Contact Manager
         </h1>
@@ -82,7 +129,6 @@ function App() {
         </button>
       </div>
 
-      {/* Input Pencarian */}
       <input
         type="text"
         placeholder="Search Contacts..."
@@ -91,18 +137,64 @@ function App() {
         className="border rounded p-2 mb-4 w-full"
       />
 
-      {/* Tampilkan pesan kesalahan jika ada */}
+      <button
+        onClick={resetSearch}
+        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-4 m-2"
+      >
+        Reset Search
+      </button>
+
+      <select
+        onChange={handleSortChange}
+        value={sortBy}
+        className="mb-4 border rounded p-2"
+      >
+        <option value="name">Sort by Name</option>
+        <option value="email">Sort by Email</option>
+        <option value="phone">Sort by Phone</option>
+      </select>
+
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-      {/* Komponen Form Kontak */}
       <ContactForm addContact={addContact} editContact={editContact} />
 
-      {/* Komponen Daftar Kontak */}
       <ContactList
-        contacts={filteredContacts} // Menggunakan kontak yang sudah difilter
+        contacts={currentContacts}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        selectedIds={selectedIds}
+        onSelect={toggleSelect}
+        addReview={addReview}
       />
+
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={handleMultiDelete}
+          disabled={selectedIds.length === 0}
+          className="bg-red-500 text-white py-2 px-4 rounded"
+        >
+          Delete Selected
+        </button>
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="bg-blue-500 text-white py-2 px-4 rounded"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+          className="bg-blue-500 text-white py-2 px-4 rounded"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
